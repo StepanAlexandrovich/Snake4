@@ -2,9 +2,13 @@ package org.example.visualization;
 
 import org.example.Core;
 import org.example.GameState;
+import org.example.TypeCell;
+import org.example.logic.Cell;
+import org.example.logic.Field;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.List;
 
 public class Render {
     private int multiplication;
@@ -45,19 +49,21 @@ public class Render {
         g.fillRect(0,0,width,height);
 
 
-        int[][] field = core.getField();
+        Field field = core.getField();
+        List<Cell> list = field.getList();
 
-        for (int y = 0; y < core.getHeight(); y++) {
-            for (int x = 0; x < core.getWidth(); x++) {
-                if(field[y][x] == 1){
-                    g.setColor(Color.BLACK);
-                    g.fillRect(x*multiplication,y*multiplication,multiplication,multiplication);
-                }
-                if(field[y][x] == 2){
-                    g.setColor(Color.RED);
-                    g.fillOval(x*multiplication,y*multiplication,multiplication,multiplication);
-                }
+        for (Cell cell : list) {
+            int bright = 60;
+            int value = cell.getValue()*bright;
+            if(value > 255) { value = 255; }
 
+            if(cell.getType() == TypeCell.SNAKE){
+                g.setColor(new Color(0,0,value));
+                g.fillRect(cell.getX()*multiplication,cell.getY()*multiplication,multiplication,multiplication);
+            }
+            if(cell.getType() == TypeCell.APPLE){
+                g.setColor(Color.RED);
+                g.fillOval(cell.getX()*multiplication,cell.getY()*multiplication,multiplication,multiplication);
             }
         }
 

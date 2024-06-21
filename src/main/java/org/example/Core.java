@@ -1,42 +1,41 @@
 package org.example;
 
-public class Core {
-    private int x,y;
-    private int direction;
+import org.example.logic.Apple;
+import org.example.logic.Cell;
+import org.example.logic.Field;
+import org.example.logic.Snake;
 
-    private int width = 40,height = 30;
-    private int[][] field;
-    private int[][] snake;
-    private int length;
+public class Core {
+    private int width = 20,height = 20;
+    private Field field = new Field(width,height);
+
+    private Snake snake = new Snake();
+    private Apple apple = new Apple();
 
     private GameState gameState = GameState.PROCESS;
 
     private int score,step;
 
-    private enum AnimalMode { MOVING,EATING,DEATH }
-    private AnimalMode snakeMode;
 
     public Core() {
         initialization();
     }
 
     private void initialization(){
-        field = new int[height][width];
-        snake = new int[height][width];
+        field.reset();
 
-        field[4][6] = 2;
-        field[6][6] = 2;
-        field[10][8] = 2;
+        field.getCell(4,6).setType(TypeCell.APPLE).setValue(0);
+        field.getCell(7,6).setType(TypeCell.APPLE).setValue(0);
+        field.getCell(10,8).setType(TypeCell.APPLE).setValue(0);
 
-        x = 2;
-        y = 1;
-        direction = 1;
-        length = 1;
+        snake.setX(2);
+        snake.setY(1);
+
+        snake.setDirection(1);
+        snake.setLength(1);
 
         score = 0;
         step = 0;
-
-        //mode = Mode.MOVING;
     }
     // get
     public int getWidth() {
@@ -47,7 +46,7 @@ public class Core {
         return height;
     }
 
-    public int[][] getField() {
+    public Field getField() {
         return field;
     }
 
@@ -62,65 +61,23 @@ public class Core {
         gameState = GameState.PROCESS;
     }
 
-    public void place(){ direction = 0; }
-    public void right(){ direction = 1; }
-    public void down() { direction = 2; }
-    public void left() { direction = 3; }
-    public void up()   { direction = 4; }
+    public void place(){ snake.place(); }
+    public void right(){ snake.right(); }
+    public void down() { snake.down(); }
+    public void left() { snake.left();}
+    public void up()   { snake.up(); }
 
     public void process(){
         if(gameState == GameState.PROCESS){
             step++;
 
-            //////// snake ///////
-            switch (direction){
-                case 1: x++; break;
-                case 2: y++; break;
-                case 3: x--; break;
-                case 4: y--; break;
-            }
+            snake.process(field);
 
-            if(!borderIn(x,y)){
-                snakeMode = AnimalMode.DEATH;
-            }else
-            if(field[y][x] == 1 ){
-                snakeMode = AnimalMode.DEATH;
-            }else
-            if(field[y][x] == 2){
-                snakeMode = AnimalMode.EATING;
-            }else
-            if(field[y][x] == 0){
-                snakeMode = AnimalMode.MOVING;
-            }
-
-
-            if(snakeMode == AnimalMode.MOVING || snakeMode == AnimalMode.EATING){
-                snake[y][x] = length + 1;
-            }
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    if(snake[y][x]>0){
-                        if(snakeMode == AnimalMode.MOVING || snakeMode == AnimalMode.DEATH){
-                            snake[y][x]--;
-                        }
-
-                        if(snake[y][x]>0){
-                            field[y][x] = 1;
-                        }else{
-                            field[y][x] = 0;
-                        }
-                    }
-                }
-            }
-            if(snakeMode == AnimalMode.EATING){
-                length++;
-            }
-            /////////////////////////////
-            if(snakeMode == AnimalMode.EATING){
+            if(snake.getMode() == AnimalMode.EATING){
                 score++;
             }
 
-            if(snakeMode == AnimalMode.DEATH){
+            if(snake.getMode() == AnimalMode.DEATH){
                 gameState = GameState.DEFEAT;
             }else
             if(score > 2){
@@ -134,8 +91,6 @@ public class Core {
 
     }
 
-    private boolean borderIn(int x,int y){
-        return x>=0 && y>=0 && x<width && y<height;
-    }
+
 
 }
